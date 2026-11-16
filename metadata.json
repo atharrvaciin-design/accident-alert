@@ -1,0 +1,6 @@
+{
+  "name": "Accident Alert – AI Emergency Reporting System",
+  "description": "Real-time emergency accident reporting and monitoring system connecting citizens with emergency responders.",
+  "requestFramePermissions": ["camera", "geolocation", "microphone"],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

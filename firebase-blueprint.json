@@ -1,0 +1,292 @@
+{
+  "entities": {
+    "AccidentReport": {
+      "title": "AccidentReport",
+      "description": "Emergency accident report filed by citizens or bystanders for rapid emergency response",
+      "type": "object",
+      "properties": {
+        "reportId": {
+          "type": "string",
+          "description": "Unique readable human identifier for the incident, e.g. ACC-2026-XXXX",
+          "maxLength": 64
+        },
+        "photoUrl": {
+          "type": "string",
+          "description": "URL or compressed image data of the captured accident photo",
+          "maxLength": 1000000
+        },
+        "latitude": {
+          "type": "number",
+          "description": "GPS latitude of the accident location"
+        },
+        "longitude": {
+          "type": "number",
+          "description": "GPS longitude of the accident location"
+        },
+        "address": {
+          "type": "string",
+          "description": "Reverse geocoded physical address or nearest intersection",
+          "maxLength": 500
+        },
+        "googleMapsUrl": {
+          "type": "string",
+          "description": "Link to view the location on Google Maps",
+          "maxLength": 1000
+        },
+        "emergencyMessage": {
+          "type": "string",
+          "description": "Detailed text written or selected by reporting user",
+          "maxLength": 2000
+        },
+        "quickMessageType": {
+          "type": "string",
+          "description": "Quick emergency message tag",
+          "maxLength": 100
+        },
+        "category": {
+          "type": "string",
+          "enum": ["Vehicle", "Pedestrian", "Infrastructure", "Multiple", "Other"],
+          "description": "Incident classification category"
+        },
+        "status": {
+          "type": "string",
+          "enum": ["Pending", "In Progress", "Resolved"],
+          "description": "Current lifecycle status of the accident report"
+        },
+        "priority": {
+          "type": "string",
+          "enum": ["Low", "Medium", "High", "Critical"],
+          "description": "Severity priority of the accident report"
+        },
+        "priorityReason": {
+          "type": "string",
+          "description": "Reasoning for the assigned priority level",
+          "maxLength": 1000
+        },
+        "aiAnalysis": {
+          "type": "object",
+          "description": "AI-assisted vision analysis results of the accident scene"
+        },
+        "senderInfo": {
+          "type": "object",
+          "description": "Optional contact information of the reporting person"
+        },
+        "responderStatus": {
+          "type": "string",
+          "enum": ["Unassigned", "Dispatched", "En Route", "On Scene"],
+          "description": "Current responder unit dispatch state"
+        },
+        "responderEtaMinutes": {
+          "type": "number",
+          "description": "Estimated arrival time in minutes"
+        },
+        "responderDistanceKm": {
+          "type": "number",
+          "description": "Distance from station to scene in kilometers"
+        },
+        "dispatcherSmsCount": {
+          "type": "number",
+          "description": "Number of nearby emergency dispatchers alerted via Twilio SMS"
+        },
+        "lastDispatcherSmsAt": {
+          "type": "string",
+          "description": "ISO timestamp of last Twilio SMS dispatcher alert",
+          "maxLength": 64
+        },
+        "voiceMessageUrl": {
+          "type": "string",
+          "description": "Base64 audio data URL of citizen recorded voice emergency message",
+          "maxLength": 900000
+        },
+        "voiceMessageDurationSec": {
+          "type": "number",
+          "description": "Duration of recorded voice message in seconds"
+        },
+        "voiceTranscript": {
+          "type": "string",
+          "description": "Optional live speech transcript of the citizen voice message",
+          "maxLength": 2000
+        },
+        "whatsappDispatches": {
+          "type": "array",
+          "description": "Automated WhatsApp photo and location dispatch records sent to emergency contacts"
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "ISO timestamp of when the report was created",
+          "maxLength": 64
+        },
+        "updatedAt": {
+          "type": "string",
+          "description": "ISO timestamp of when the report was last updated",
+          "maxLength": 64
+        }
+      },
+      "required": ["reportId", "latitude", "longitude", "address", "emergencyMessage", "status", "priority", "createdAt"]
+    },
+    "EmergencyDispatcher": {
+      "title": "EmergencyDispatcher",
+      "description": "Registered emergency dispatcher or response unit eligible to receive critical SMS alerts",
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Dispatcher or unit lead name",
+          "maxLength": 120
+        },
+        "unitCode": {
+          "type": "string",
+          "description": "Unit callsign code, e.g. EMS-01",
+          "maxLength": 32
+        },
+        "role": {
+          "type": "string",
+          "enum": ["EMS Lead", "Fire & Rescue", "Highway Patrol", "Trauma Unit"],
+          "description": "Emergency response specialty"
+        },
+        "phone": {
+          "type": "string",
+          "description": "E.164 SMS-capable phone number",
+          "maxLength": 32
+        },
+        "latitude": {
+          "type": "number",
+          "description": "Station or patrol latitude"
+        },
+        "longitude": {
+          "type": "number",
+          "description": "Station or patrol longitude"
+        },
+        "stationName": {
+          "type": "string",
+          "description": "Base station or sector name",
+          "maxLength": 200
+        },
+        "maxRadiusKm": {
+          "type": "number",
+          "description": "Alert dispatch radius in kilometers"
+        },
+        "active": {
+          "type": "boolean",
+          "description": "Whether dispatcher is currently on-duty for SMS alerts"
+        },
+        "createdAt": {
+          "type": "string",
+          "maxLength": 64
+        },
+        "updatedAt": {
+          "type": "string",
+          "maxLength": 64
+        }
+      },
+      "required": ["name", "unitCode", "role", "phone", "latitude", "longitude", "maxRadiusKm", "active"]
+    },
+    "DispatcherSmsAlert": {
+      "title": "DispatcherSmsAlert",
+      "description": "Audit log of real-time Twilio SMS alerts sent to nearby dispatchers for Critical reports",
+      "type": "object",
+      "properties": {
+        "reportDocId": {
+          "type": "string",
+          "maxLength": 128
+        },
+        "reportId": {
+          "type": "string",
+          "maxLength": 64
+        },
+        "priority": {
+          "type": "string",
+          "enum": ["Low", "Medium", "High", "Critical"]
+        },
+        "dispatcherId": {
+          "type": "string",
+          "maxLength": 128
+        },
+        "dispatcherName": {
+          "type": "string",
+          "maxLength": 120
+        },
+        "unitCode": {
+          "type": "string",
+          "maxLength": 32
+        },
+        "dispatcherPhone": {
+          "type": "string",
+          "maxLength": 32
+        },
+        "distanceKm": {
+          "type": "number"
+        },
+        "withinRadius": {
+          "type": "boolean"
+        },
+        "message": {
+          "type": "string",
+          "maxLength": 1600
+        },
+        "gatewayProvider": {
+          "type": "string",
+          "enum": ["twilio", "twilio-sandbox"]
+        },
+        "gatewaySid": {
+          "type": "string",
+          "maxLength": 128
+        },
+        "status": {
+          "type": "string",
+          "enum": ["queued", "sent", "delivered", "simulated", "failed"]
+        },
+        "errorMessage": {
+          "type": "string",
+          "maxLength": 500
+        },
+        "createdAt": {
+          "type": "string",
+          "maxLength": 64
+        }
+      },
+      "required": ["reportDocId", "reportId", "priority", "dispatcherId", "dispatcherName", "dispatcherPhone", "message", "gatewayProvider", "status", "createdAt"]
+    },
+    "AdminUser": {
+      "title": "AdminUser",
+      "description": "Authorized emergency personnel / dispatcher administrator record",
+      "type": "object",
+      "properties": {
+        "email": {
+          "type": "string",
+          "description": "Admin email address",
+          "maxLength": 256
+        },
+        "role": {
+          "type": "string",
+          "description": "Administrative authority role",
+          "maxLength": 64
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "Creation timestamp",
+          "maxLength": 64
+        }
+      },
+      "required": ["email", "role"]
+    }
+  },
+  "firestore": {
+    "/accidentReports/{reportId}": {
+      "schema": "AccidentReport",
+      "description": "Real-time stream of all accident reports filed for emergency response"
+    },
+    "/dispatchers/{dispatcherId}": {
+      "schema": "EmergencyDispatcher",
+      "description": "Nearby emergency dispatcher units configured to receive critical Twilio SMS alerts"
+    },
+    "/dispatcherSmsAlerts/{alertId}": {
+      "schema": "DispatcherSmsAlert",
+      "description": "Audit log of Twilio SMS alerts dispatched to nearby units for critical incidents"
+    },
+    "/admins/{adminId}": {
+      "schema": "AdminUser",
+      "description": "Authorized administrators who can manage and delete accident reports"
+    }
+  }
+}

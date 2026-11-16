@@ -1,0 +1,157 @@
+@import "tailwindcss";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* Leaflet map styles */
+.leaflet-container {
+  font-family: inherit;
+  z-index: 10;
+}
+
+/* Night-time high-contrast dark map tiles */
+.dark .leaflet-tile-pane {
+  filter: brightness(0.65) invert(1) contrast(2.2) hue-rotate(190deg) saturate(0.4) brightness(0.75);
+}
+
+.leaflet-popup-content-wrapper {
+  border-radius: 1rem;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.15), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+  padding: 0;
+  overflow: hidden;
+}
+
+.dark .leaflet-popup-content-wrapper {
+  background-color: #0f172a;
+  color: #f8fafc;
+  border: 1px solid #334155;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.6);
+}
+
+.dark .leaflet-popup-tip {
+  background-color: #0f172a;
+}
+
+.leaflet-popup-content {
+  margin: 10px 12px;
+  line-height: 1.4;
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  20%, 60% { transform: translateX(-6px); }
+  40%, 80% { transform: translateX(6px); }
+}
+
+.animate-shake {
+  animation: shake 0.4s ease-in-out;
+}
+
+/* Subtle pinging radar animation for pending emergency markers */
+@keyframes subtle-ping {
+  0% {
+    transform: scale(0.9);
+    opacity: 0.8;
+  }
+  70%, 100% {
+    transform: scale(2.2);
+    opacity: 0;
+  }
+}
+
+@keyframes subtle-ping-delayed {
+  0% {
+    transform: scale(0.9);
+    opacity: 0.5;
+  }
+  70%, 100% {
+    transform: scale(2.6);
+    opacity: 0;
+  }
+}
+
+.animate-subtle-ping {
+  animation: subtle-ping 2.2s cubic-bezier(0, 0, 0.2, 1) infinite;
+}
+
+.animate-subtle-ping-delayed {
+  animation: subtle-ping-delayed 2.2s cubic-bezier(0, 0, 0.2, 1) 0.75s infinite;
+}
+
+.custom-accident-marker {
+  overflow: visible !important;
+}
+
+.custom-accident-marker > div {
+  overflow: visible !important;
+}
+
+/* ==========================================================================
+   PRINT-FRIENDLY ACCIDENT REPORT STYLES
+   Hides navigation, background banners, sirens, buttons, and formats incident
+   dossier into clean, ink-friendly black-and-white printouts / PDF export.
+   ========================================================================== */
+@media print {
+  @page {
+    margin: 1.2cm;
+    size: auto;
+  }
+
+  /* Reset global backgrounds and colors for paper */
+  html, body {
+    background: #ffffff !important;
+    color: #0f172a !important;
+    font-size: 11pt !important;
+    width: 100% !important;
+    height: auto !important;
+    min-height: auto !important;
+    overflow: visible !important;
+  }
+
+  /* Hide all dashboard chrome: top nav, tab bar, footer, sirens, audio controls, leaflet map controls, action buttons */
+  header,
+  footer,
+  nav,
+  .no-print,
+  button,
+  .leaflet-control-container,
+  audio,
+  video {
+    display: none !important;
+  }
+
+  /* Isolate printable accident dossier */
+  body * {
+    visibility: hidden;
+  }
+
+  #printable-accident-dossier,
+  #printable-accident-dossier * {
+    visibility: visible !important;
+  }
+
+  #printable-accident-dossier {
+    position: absolute !important;
+    left: 0 !important;
+    top: 0 !important;
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    background: #ffffff !important;
+    color: #0f172a !important;
+    box-shadow: none !important;
+    border: none !important;
+    display: block !important;
+  }
+
+  .page-break-inside-avoid {
+    break-inside: avoid !important;
+    page-break-inside: avoid !important;
+  }
+
+  img {
+    max-width: 100% !important;
+    break-inside: avoid !important;
+    page-break-inside: avoid !important;
+  }
+}
+

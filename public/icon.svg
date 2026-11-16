@@ -1,0 +1,42 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ef4444" />
+      <stop offset="55%" stop-color="#dc2626" />
+      <stop offset="100%" stop-color="#991b1b" />
+    </linearGradient>
+    <linearGradient id="shieldGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#ffffff" />
+      <stop offset="100%" stop-color="#fee2e2" />
+    </linearGradient>
+  </defs>
+
+  <!-- Rounded Red Emergency Tile Background -->
+  <rect x="0" y="0" width="512" height="512" rx="112" fill="url(#bgGrad)" />
+  <rect x="16" y="16" width="480" height="480" rx="98" fill="none" stroke="rgba(255,255,255,0.22)" stroke-width="6" />
+
+  <!-- Subtle Outer Pulse Ring -->
+  <circle cx="256" cy="256" r="196" fill="none" stroke="rgba(255,255,255,0.16)" stroke-width="8" stroke-dasharray="22 14" />
+
+  <!-- White Emergency Shield Silhouette -->
+  <path
+    d="M256 76 L396 130 C396 248 352 356 256 432 C160 356 116 248 116 130 Z"
+    fill="url(#shieldGrad)"
+    stroke="#ffffff"
+    stroke-width="10"
+    stroke-linejoin="round"
+  />
+
+  <!-- Inner Shield Accent Border -->
+  <path
+    d="M256 102 L370 146 C370 245 334 334 256 398 C178 334 142 245 142 146 Z"
+    fill="none"
+    stroke="#fca5a5"
+    stroke-width="6"
+    stroke-linejoin="round"
+  />
+
+  <!-- Bold Red Exclamation Alert Symbol inside Shield -->
+  <rect x="236" y="164" width="40" height="122" rx="20" fill="#dc2626" />
+  <circle cx="256" cy="326" r="23" fill="#dc2626" />
+</svg>

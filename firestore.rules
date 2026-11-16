@@ -1,0 +1,129 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Global Safety Net - Default Deny
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Helper functions
+    function isValidId(id) {
+      return id is string && id.size() > 0 && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    function isValidStatus(status) {
+      return status in ['Pending', 'In Progress', 'Resolved'];
+    }
+
+    function isValidPriority(priority) {
+      return priority in ['Low', 'Medium', 'High', 'Critical'];
+    }
+
+    function isValidAccidentReport(data) {
+      return data.reportId is string && data.reportId.size() > 0 && data.reportId.size() <= 64
+        && data.latitude is number && data.latitude >= -90.0 && data.latitude <= 90.0
+        && data.longitude is number && data.longitude >= -180.0 && data.longitude <= 180.0
+        && data.address is string && data.address.size() <= 500
+        && data.emergencyMessage is string && data.emergencyMessage.size() <= 2000
+        && (!('voiceMessageUrl' in data) || (data.voiceMessageUrl is string && data.voiceMessageUrl.size() <= 900000))
+        && (!('voiceMessageDurationSec' in data) || (data.voiceMessageDurationSec is number && data.voiceMessageDurationSec >= 0 && data.voiceMessageDurationSec <= 120))
+        && (!('voiceTranscript' in data) || (data.voiceTranscript is string && data.voiceTranscript.size() <= 2000))
+        && (!('whatsappDispatches' in data) || (data.whatsappDispatches is list && data.whatsappDispatches.size() <= 20))
+        && isValidStatus(data.status)
+        && isValidPriority(data.priority);
+    }
+
+    function isValidDispatcher(data) {
+      return data.name is string && data.name.size() > 0 && data.name.size() <= 120
+        && data.unitCode is string && data.unitCode.size() > 0 && data.unitCode.size() <= 32
+        && data.role in ['EMS Lead', 'Fire & Rescue', 'Highway Patrol', 'Trauma Unit']
+        && data.phone is string && data.phone.size() >= 7 && data.phone.size() <= 32
+        && data.latitude is number && data.latitude >= -90.0 && data.latitude <= 90.0
+        && data.longitude is number && data.longitude >= -180.0 && data.longitude <= 180.0
+        && data.maxRadiusKm is number && data.maxRadiusKm > 0 && data.maxRadiusKm <= 500
+        && data.active is bool;
+    }
+
+    function isValidDispatcherSmsAlert(data) {
+      return data.reportDocId is string && data.reportDocId.size() > 0 && data.reportDocId.size() <= 128
+        && data.reportId is string && data.reportId.size() > 0 && data.reportId.size() <= 64
+        && isValidPriority(data.priority)
+        && data.dispatcherId is string && data.dispatcherId.size() > 0 && data.dispatcherId.size() <= 128
+        && data.dispatcherName is string && data.dispatcherName.size() <= 120
+        && data.dispatcherPhone is string && data.dispatcherPhone.size() <= 32
+        && data.message is string && data.message.size() <= 1600
+        && data.gatewayProvider in ['twilio', 'twilio-sandbox']
+        && data.status in ['queued', 'sent', 'delivered', 'simulated', 'failed']
+        && data.createdAt is string && data.createdAt.size() <= 64;
+    }
+
+    // Accident Reports Collection
+    match /accidentReports/{reportId} {
+      allow get: if isValidId(reportId);
+      allow list: if true;
+
+      // Emergency reports can be created by any reporting bystander or citizen
+      allow create: if isValidId(reportId)
+        && isValidAccidentReport(incoming());
+
+      // Update triage status, priority, responder telemetry, or admin notes
+      allow update: if isValidId(reportId)
+        && isValidAccidentReport(incoming())
+        && incoming().reportId == existing().reportId
+        && incoming().createdAt == existing().createdAt
+        && incoming().latitude == existing().latitude
+        && incoming().longitude == existing().longitude
+        && incoming().diff(existing()).affectedKeys().hasOnly([
+          'status',
+          'priority',
+          'priorityReason',
+          'updatedAt',
+          'aiAnalysis',
+          'emergencyMessage',
+          'notes',
+          'internalNotes',
+          'adminNotesList',
+          'responderStatus',
+          'responderEtaMinutes',
+          'responderDistanceKm',
+          'dispatcherSmsCount',
+          'lastDispatcherSmsAt'
+        ]);
+
+      // Allow deletion for resolved / archived reports by dispatchers
+      allow delete: if isValidId(reportId);
+    }
+
+    // Nearby Emergency Dispatchers Collection
+    match /dispatchers/{dispatcherId} {
+      allow get: if isValidId(dispatcherId);
+      allow list: if true;
+      allow create: if isValidId(dispatcherId) && isValidDispatcher(incoming());
+      allow update: if isValidId(dispatcherId) && isValidDispatcher(incoming());
+      allow delete: if isValidId(dispatcherId);
+    }
+
+    // Dispatcher SMS Alert Logs Collection
+    match /dispatcherSmsAlerts/{alertId} {
+      allow get: if isValidId(alertId);
+      allow list: if true;
+      allow create: if isValidId(alertId) && isValidDispatcherSmsAlert(incoming());
+      allow delete: if isValidId(alertId);
+    }
+
+    // Admin Users Collection
+    match /admins/{adminId} {
+      allow read: if request.auth != null && isValidId(adminId);
+      allow write: if request.auth != null && isValidId(adminId) && request.auth.uid == adminId;
+    }
+  }
+}
